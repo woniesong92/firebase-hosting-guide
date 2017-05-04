@@ -1,17 +1,20 @@
-import React, { Component } from 'react';
-import { Link } from 'react-router-dom';
-import * as firebase from 'firebase';
-import './user-sign-up-demo.css';
+import React, { Component } from 'react'
+import { Link } from 'react-router-dom'
+import * as firebase from 'firebase'
+import { connect } from 'react-redux'
+import * as Actions from './actions'
+import './user-sign-up-demo.css'
 
 class UserSignUpDemo extends Component {
   constructor(props) {
     super(props)
 
+    // NOTE: use internal state when this is ONLY used in this specific component (i.e. UI changes)
+    // for anything that's related to DATA, use global redux store
     this.state = {
       isSignUp: true,
       email: '',
       password: '',
-      currentUser: null,
     }
   }
 
@@ -19,15 +22,22 @@ class UserSignUpDemo extends Component {
     // NOTE: this is how you check whether the user just signed up/in
     firebase.auth().onAuthStateChanged(function(user) {
       if (user) {
-        this.setState({ currentUser: user })
+        const { email, uid } = user
+
+        this.props.dispatch(Actions.signIn({
+          email,
+          uid,
+        }))
       } else {
-        this.setState({ currentUser: null })
+        this.props.dispatch(Actions.signIn())
       }
-    }.bind(this));
+    }.bind(this))
   }
 
   onToggleSignUp = (event) => {
     event.preventDefault()
+
+    // NOTE: this is a good example of using a local state instead of global store
     this.setState({
       isSignUp: !this.state.isSignUp,
     })
@@ -40,7 +50,7 @@ class UserSignUpDemo extends Component {
     // NOTE: this is how you create a user on firebase
     firebase.auth().createUserWithEmailAndPassword(email, password).catch(function(error) {
       console.log(error)
-    });
+    })
   }
 
   onSignIn = (event) => {
@@ -50,28 +60,31 @@ class UserSignUpDemo extends Component {
     // NOTE: this is how you login a user from firebase
     firebase.auth().signInWithEmailAndPassword(email, password).catch(function(error) {
       console.log(error)
-    });
+    })
   }
 
   onSignOut = () => {
-    firebase.auth().signOut().then(function() {
-      // this.setState({ currentUser: null })
-    }.bind(this)).catch(function(error) {
+    firebase.auth().signOut().catch(function(error) {
       console.log("failed to signout")
-    });
+    })
   }
 
   onFieldChange = (field, event) => {
+    // TODO: use redux-form
     this.setState({
       [field]: event.target.value,
     })
   }
 
   render() {
-    if (this.state.currentUser) {
+    // Explicitly deconstruct props and states that are going to be used
+    const { currentUser } = this.props
+    const { isSignUp, email, password } = this.state
+
+    if (currentUser) {
       return (
         <div>
-          <h1>Welcome! {this.state.currentUser.email} </h1>
+          <h1>Welcome! {currentUser.email} </h1>
           <ul>
             <li><a href='#' onClick={this.onSignOut}>Sign Out</a></li>
             <li><Link to="/">Home</Link></li>
@@ -84,7 +97,7 @@ class UserSignUpDemo extends Component {
       <div className="user-sign-up-demo">
         <h1>UserSignUpDemo</h1>
 
-        { this.state.isSignUp ?
+        { isSignUp ?
           (<div className="user-sign-up-demo__signup">
             <h5>Sign Up!</h5>
             <form className="user-sign-up-demo__signup"
@@ -95,7 +108,7 @@ class UserSignUpDemo extends Component {
                 <input type="email"
                        placeholder="email" 
                        onChange={this.onFieldChange.bind(this, 'email')}
-                       value={this.state.email}
+                       value={email}
                 />
               </div>
               <div>
@@ -103,7 +116,7 @@ class UserSignUpDemo extends Component {
                 <input type="password"
                        placeholder="password"
                        onChange={this.onFieldChange.bind(this, 'password')}
-                       value={this.state.password}
+                       value={password}
                 />
               </div>
               <button type="submit">Sign Up</button>
@@ -121,7 +134,7 @@ class UserSignUpDemo extends Component {
                 <input type="email"
                        placeholder="email" 
                        onChange={this.onFieldChange.bind(this, 'email')}
-                       value={this.state.email}
+                       value={email}
                 />
               </div>
               <div>
@@ -129,7 +142,7 @@ class UserSignUpDemo extends Component {
                 <input type="password"
                        placeholder="password" 
                        onChange={this.onFieldChange.bind(this, 'password')}
-                       value={this.state.password}
+                       value={password}
                 />
               </div>
               <button type="submit">Login</button>
@@ -138,8 +151,23 @@ class UserSignUpDemo extends Component {
           </div>)
         }
       </div>
-    );
+    )
   }
 }
 
-export default UserSignUpDemo;
+// NOTE: "state" is the global state (i.e. global store's state)
+// NOTE: state.UserSignUpDemo is the state from ./reducer
+const mapStateToProps = (state, ownProps) => {
+  // 1. only select some states to use
+  return {
+    currentUser: state.UserSignUpDemo.currentUser,
+  }
+
+  // Or 2. select the entire state in ./reducer
+  // return state.UserSignUpDemo
+}
+
+export default connect(
+  mapStateToProps,
+  null // NOTE: to fire actions for redux store, we can just do this.props.dispatch(someAction(someArg))
+)(UserSignUpDemo)
