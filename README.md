@@ -35,6 +35,11 @@ This is a guide that shows you how to to create a react app and host it on Fireb
    
 ##### Development
 
+0. Clone the repository
+   ```
+   $git clone git@github.com:woniesong92/firebase-hosting-guide.git
+   ```
+
 1. Run the development server
    ```
    $npm start
