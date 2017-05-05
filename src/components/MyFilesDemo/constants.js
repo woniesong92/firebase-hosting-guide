@@ -1,0 +1,4 @@
+export default {
+  FETCH_FILES:             'MY_FILES_DEMO/FETCH_FILES',
+  FETCH_FILES_RESULT:      'MY_FILES_DEMO/FETCH_FILES_RESULT',
+}

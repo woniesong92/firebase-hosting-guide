@@ -1,6 +1,4 @@
 import React, { Component } from 'react'
-import { Link } from 'react-router-dom'
-import * as firebase from 'firebase'
 import { connect } from 'react-redux'
 import * as Actions from './actions'
 import './user-sign-up-demo.css'
@@ -18,22 +16,6 @@ class UserSignUpDemo extends Component {
     }
   }
 
-  componentDidMount() {
-    // NOTE: this is how you check whether the user just signed up/in
-    firebase.auth().onAuthStateChanged(function(user) {
-      if (user) {
-        const { email, uid } = user
-
-        this.props.dispatch(Actions.signIn({
-          email,
-          uid,
-        }))
-      } else {
-        this.props.dispatch(Actions.signOut())
-      }
-    }.bind(this))
-  }
-
   onToggleSignUp = (event) => {
     event.preventDefault()
 
@@ -47,43 +29,25 @@ class UserSignUpDemo extends Component {
     event.preventDefault()
     const { email, password } = this.state
 
-    // NOTE: this is how you create a user on firebase
-    firebase.auth().createUserWithEmailAndPassword(email, password)
-    .then(user => {
-      const { uid, email} = user
-
-      // Store this user into our firebase DB
-      // User authentication and DB are separate on Firebase, so it's necessary
-      // to store a user object into DB explicitly one more time
-      firebase.database().ref('users/' + uid).set({
-        email
-      })
-
-      // Store this user object into our global store
-      this.props.dispatch(Actions.signIn({
-        email,
-        uid,
-      }))
-    })
-    .catch(error => {
-      console.log(error)
-    })
+    this.props.dispatch(Actions.signUp({
+      email,
+      password,
+    }))
   }
 
   onSignIn = (event) => {
     event.preventDefault()
     const { email, password } = this.state
 
-    // NOTE: this is how you login a user from firebase
-    firebase.auth().signInWithEmailAndPassword(email, password).catch(function(error) {
-      console.log(error)
-    })
+    this.props.dispatch(Actions.signIn({
+      email,
+      password,
+    }))
   }
 
-  onSignOut = () => {
-    firebase.auth().signOut().catch(function(error) {
-      console.log("failed to signout")
-    })
+  onSignOut = (event) => {
+    event.preventDefault()
+    this.props.dispatch(Actions.signOut())
   }
 
   onFieldChange = (field, event) => {
@@ -99,17 +63,9 @@ class UserSignUpDemo extends Component {
     const { isSignUp, email, password } = this.state
 
     if (currentUser) {
-      return (
-        <div>
-          <h1>Welcome! {currentUser.email} </h1>
-          <ul>
-            <li><a href='#' onClick={this.onSignOut}>Sign Out</a></li>
-            <li><Link to="/uploader">Uploader</Link></li>
-            <li><Link to="/users">All Users</Link></li>
-            <li><Link to="/">Home</Link></li>
-          </ul>
-        </div>
-      )
+      console.log("You're signed in... Let me redirect you home")
+      this.props.history.push('/')
+      return null
     }
 
     return (

@@ -1,5 +1,4 @@
-import CONSTANTS from './constants';
-import * as firebase from 'firebase'
+import CONSTANTS from './constants'
 
 const initialState = {
   users: [],

@@ -3,7 +3,6 @@ import { Link } from 'react-router-dom'
 import { connect } from 'react-redux'
 import Dropzone from 'react-dropzone'
 import * as firebase from 'firebase'
-import * as Actions from './actions'
 import './uploader-demo.css'
 
 class UploaderDemo extends Component {
@@ -104,12 +103,12 @@ class UploaderDemo extends Component {
               <label>3. {downloadURL ? 'Uploaded' : 'Uploading...' }</label>
             </div>
             <div>
-              { downloadURL ? <img src={downloadURL} /> : <span>{uploadProgress}%</span> }
+              { downloadURL ? <img src={downloadURL} alt="" /> : <span>{uploadProgress}%</span> }
             </div>
           </div>
         }
 
-        <Link to='/'>Back</Link>
+        <Link to='/my-files'>My files</Link>
       </div>
     )
   }
