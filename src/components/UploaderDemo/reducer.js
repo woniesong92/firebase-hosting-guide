@@ -2,8 +2,7 @@ import CONSTANTS from './constants';
 import * as firebase from 'firebase'
 
 const initialState = {
-  // currentUser: null,
-  // storageRef: firebase.storage().ref()
+
 };
 
 export default function UploaderDemo(state = initialState, action) {

@@ -29,7 +29,7 @@ class UserSignUpDemo extends Component {
           uid,
         }))
       } else {
-        this.props.dispatch(Actions.signIn())
+        this.props.dispatch(Actions.signOut())
       }
     }.bind(this))
   }
@@ -48,7 +48,24 @@ class UserSignUpDemo extends Component {
     const { email, password } = this.state
 
     // NOTE: this is how you create a user on firebase
-    firebase.auth().createUserWithEmailAndPassword(email, password).catch(function(error) {
+    firebase.auth().createUserWithEmailAndPassword(email, password)
+    .then(user => {
+      const { uid, email} = user
+
+      // Store this user into our firebase DB
+      // User authentication and DB are separate on Firebase, so it's necessary
+      // to store a user object into DB explicitly one more time
+      firebase.database().ref('users/' + uid).set({
+        email
+      })
+
+      // Store this user object into our global store
+      this.props.dispatch(Actions.signIn({
+        email,
+        uid,
+      }))
+    })
+    .catch(error => {
       console.log(error)
     })
   }
@@ -88,6 +105,7 @@ class UserSignUpDemo extends Component {
           <ul>
             <li><a href='#' onClick={this.onSignOut}>Sign Out</a></li>
             <li><Link to="/uploader">Uploader</Link></li>
+            <li><Link to="/users">All Users</Link></li>
             <li><Link to="/">Home</Link></li>
           </ul>
         </div>

@@ -12,9 +12,9 @@ class UploaderDemo extends Component {
 
     this.state = {
       // NOTE: we will use the following file structure on firebase
-      // 1. raw: uid/dataset_name/raw/1.jpg, 2.jpg…
-      // 2. labeled: uid/dataset_name/labeled/dog/1.jpg, 2.jpg...
-      //             uid/dataset_name/labeled/cat/1.jpg, 2.jpg...
+      // 1. raw:     datasets/uid/dataset_name/raw/1.jpg, 2.jpg…
+      // 2. labeled: datasets/uid/dataset_name/labeled/dog/1.jpg, 2.jpg...
+      //             datasets/uid/dataset_name/labeled/cat/1.jpg, 2.jpg...
       datasetName: '',
       uploadProgress: 0,
       downloadURL: '',
@@ -24,8 +24,8 @@ class UploaderDemo extends Component {
   // React Dropzone expects these two arguments
   onDrop = (acceptedFiles, rejectedFiles) => {
     acceptedFiles.forEach(file => {
-      const filePath = `${this.props.currentUser.uid}/${this.state.datasetName}/raw/${file.name}`
-      this.uploadFile(filePath, file)
+      const folderPath = `datasets/${this.props.currentUser.uid}/${this.state.datasetName}/raw/`
+      this.uploadFile(folderPath, file)
     })
   }
 
@@ -33,9 +33,10 @@ class UploaderDemo extends Component {
     this.setState({ datasetName: event.target.value })
   }
 
-  uploadFile = (filePath, file) => {
+  uploadFile = (folderPath, file) => {
     const storageRef = firebase.storage().ref()
-    const uploadTask = storageRef.child(filePath).put(file)
+    const dbRef = firebase.database().ref()
+    const uploadTask = storageRef.child(folderPath + file.name).put(file)
 
     uploadTask.on('state_changed', (snapshot) => {
       // Get task progress, including the number of bytes uploaded and the total number of bytes to be uploaded
@@ -44,10 +45,19 @@ class UploaderDemo extends Component {
     }, (error) => {
       console.log("UPLOAD FAILED", error)
     }, () => {
-      // NOTE: Firebase doesnt have an API to retrieve file URLs from a folder ref
-      // We need to store download URLs in Database
       const downloadURL = uploadTask.snapshot.downloadURL
       this.setState({ downloadURL })
+
+      // NOTE: Firebase doesnt have an API to retrieve file URLs from a folder ref
+      // We need to store download URLs in Database
+      // https://firebase.google.com/docs/database/web/lists-of-data
+      const newFileRef = dbRef.child(folderPath).push()
+      newFileRef.set({
+        url: downloadURL,
+        type: file.type,
+        size: file.size,
+        name: file.name,
+      })
     })
   }
 
@@ -98,6 +108,8 @@ class UploaderDemo extends Component {
             </div>
           </div>
         }
+
+        <Link to='/'>Back</Link>
       </div>
     )
   }

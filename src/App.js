@@ -8,9 +8,8 @@ import { FIREBASE_CONFIG } from './config'
 import Home from './components/Home'
 import UserSignUpDemo from './components/UserSignUpDemo'
 import UploaderDemo from './components/UploaderDemo'
+import AllUsersDemo from './components/AllUsersDemo'
 
-
-// // Initialize firebase
 firebase.initializeApp(FIREBASE_CONFIG)
 
 class App extends Component {
@@ -22,6 +21,7 @@ class App extends Component {
             <Route exact path="/" component={Home}/>
             <Route exact path="/signup" component={UserSignUpDemo}/>
             <Route exact path="/uploader" component={UploaderDemo}/>
+            <Route exact path="/users" component={AllUsersDemo}/>
           </div>
         </Router>
       </Provider>
