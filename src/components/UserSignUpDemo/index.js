@@ -87,6 +87,7 @@ class UserSignUpDemo extends Component {
           <h1>Welcome! {currentUser.email} </h1>
           <ul>
             <li><a href='#' onClick={this.onSignOut}>Sign Out</a></li>
+            <li><Link to="/uploader">Uploader</Link></li>
             <li><Link to="/">Home</Link></li>
           </ul>
         </div>
